@@ -1,0 +1,145 @@
+body {
+    background-color: #f5f2eb;
+    color: #2c251f;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: #e6ded1;
+    border-radius: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #b5a48d;
+    border-radius: 8px;
+}
+
+/* ===== MAIN NAVIGATION TABS ===== */
+.main-nav-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.45rem 0.9rem;
+    border-radius: 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #6e5f52;
+    background: transparent;
+    border: none;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background 0.16s, color 0.16s, box-shadow 0.16s;
+}
+.main-nav-btn:hover {
+    background: #e6ded1;
+    color: #2c251f;
+}
+.main-nav-btn.active {
+    background: #b85d39;
+    color: #ffffff;
+    box-shadow: 0 2px 8px rgba(184, 93, 57, 0.28);
+}
+
+/* Badge pending trên tab Quản trị */
+.admin-tab-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.15rem;
+    height: 1.15rem;
+    padding: 0 5px;
+    border-radius: 999px;
+    background: #d97706;
+    color: #ffffff;
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1;
+}
+.main-nav-btn.active .admin-tab-badge,
+.admin-sub-btn.active .admin-tab-badge {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+/* ===== ADMIN SUB-TABS ===== */
+.admin-sub-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.45rem 0.9rem;
+    border-radius: 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #6e5f52;
+    background: #f5f2eb;
+    border: 1px solid #d1c4b0;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.admin-sub-btn:hover {
+    background: #e6ded1;
+    color: #2c251f;
+}
+.admin-sub-btn.active {
+    background: #b85d39;
+    color: #ffffff;
+    border-color: #b85d39;
+    box-shadow: 0 1px 6px rgba(184, 93, 57, 0.22);
+}
+
+/* ===== LETTER FILTER BAR ===== */
+.letter-btn {
+    padding: 0.3rem 0.6rem;
+    border-radius: 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #4a3f35;
+    background: #e6ded1;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: background 0.14s, color 0.14s, border-color 0.14s;
+}
+.letter-btn:hover {
+    background: #d1c4b0;
+    color: #2c251f;
+}
+.letter-btn.active {
+    background: #b85d39;
+    color: #ffffff;
+    border-color: #964828;
+}
+
+/* ===== PAGINATION ===== */
+.page-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2rem;
+    height: 2rem;
+    padding: 0 0.65rem;
+    border-radius: 0.6rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    background: #e6ded1;
+    color: #4a3f35;
+    border: 1px solid #d1c4b0;
+    cursor: pointer;
+    transition: background 0.14s, color 0.14s, border-color 0.14s;
+}
+.page-btn:hover:not(:disabled) {
+    background: #d1c4b0;
+    color: #2c251f;
+}
+.page-btn.active {
+    background: #b85d39;
+    color: #ffffff;
+    border-color: #b85d39;
+}
+.page-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}

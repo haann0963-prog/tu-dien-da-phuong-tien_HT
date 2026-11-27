@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="vi" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Từ điển số đa phương tiện Tiếng Hà Tĩnh - VISEF 2026</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap"
+        rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Be Vietnam Pro', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    },
+                    colors: {
+                        vintage: {
+                            50: '#fcfbfa',
+                            100: '#f5f2eb',
+                            200: '#e6ded1',
+                            300: '#d1c4b0',
+                            600: '#8c7a6b',
+                            700: '#6e5f52',
+                            800: '#4a3f35',
+                            900: '#2c251f',
+                        },
+                        terracotta: {
+                            DEFAULT: '#b85d39',
+                            dark: '#964828',
+                        },
+                        sage: {
+                            DEFAULT: '#7a8b75',
+                            light: '#eef2ed',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="min-h-screen flex flex-col justify-between selection:bg-terracotta selection:text-white antialiased">
+
+    <!-- Header Navigation -->
+    <header class="sticky top-0 z-40 bg-vintage-50/95 backdrop-blur-md border-b border-vintage-300 shadow-sm">
+        <div class="max-w-6xl mx-auto px-3 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-2">
+            <div class="flex items-center space-x-2.5 sm:space-x-3 min-w-0">
+                <div
+                    class="w-10 h-10 sm:w-12 sm:h-12 flex-shrink-0 bg-gradient-to-tr from-terracotta to-amber-700 rounded-2xl flex items-center justify-center text-white shadow-md shadow-terracotta/20">
+                    <i class="fa-solid fa-book-bookmark text-lg sm:text-xl"></i>
+                </div>
+                <div class="truncate">
+                    <div class="flex items-center gap-2">
+                        <h1 class="text-sm sm:text-xl font-bold font-serif text-terracotta truncate">Từ điển số Tiếng Hà
+                            Tĩnh</h1>
+                        <span id="cloudStatusDot"
+                            class="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-vintage-200 text-vintage-700 border border-vintage-300 flex-shrink-0"
+                            title="Trạng thái đồng bộ dữ liệu">
+                            <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                            <span class="hidden sm:inline" id="cloudStatusText">Đang kết nối...</span>
+                        </span>
+                    </div>
+                    <p class="text-[11px] sm:text-xs text-vintage-700 font-medium truncate">Bảo tồn phương ngữ &amp; di
+                        sản văn hóa xứ Nghệ • VISEF</p>
+                </div>
+            </div>
+
+            <!-- Role Control & Action -->
+            <div class="flex items-center space-x-1.5 sm:space-x-3 flex-shrink-0">
+                <div
+                    class="flex items-center space-x-1.5 bg-vintage-200 px-2 sm:px-3 py-1.5 rounded-xl border border-vintage-300 text-[11px] sm:text-xs">
+                    <span id="roleLabel" class="hidden md:inline font-bold text-terracotta">Chế độ: Khách</span>
+                    <button type="button" onclick="toggleAdminMode()" id="adminToggleBtn"
+                        class="bg-terracotta hover:bg-terracotta-dark text-white px-2.5 py-1 rounded-lg font-bold transition cursor-pointer">Quản
+                        trị (Admin)</button>
+                </div>
+                <div class="flex items-center gap-1.5 sm:gap-2">
+                    <button type="button" onclick="openAddModal()"
+                        class="inline-flex items-center space-x-1 sm:space-x-1.5 bg-terracotta hover:bg-terracotta-dark text-white text-[11px] sm:text-sm font-semibold px-2.5 sm:px-3.5 py-2 sm:py-2.5 rounded-xl shadow-sm transition active:scale-95 cursor-pointer">
+                        <i class="fa-solid fa-plus-circle"></i>
+                        <span>Đóng góp</span>
+                    </button>
+                    <button type="button" onclick="openBatchModal()"
+                        class="inline-flex items-center space-x-1.5 bg-sage hover:bg-sage/80 text-white text-xs sm:text-sm font-semibold px-2.5 sm:px-3.5 py-2 sm:py-2.5 rounded-xl shadow-sm transition active:scale-95 cursor-pointer"
+                        title="Tải lên tệp chứa nhiều từ vựng">
+                        <i class="fa-solid fa-file-arrow-up"></i>
+                        <span class="hidden md:inline">Tải tệp từ</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Navigation Tab Bar -->
+    <nav id="mainNavBar" class="sticky top-[80px] z-30 bg-vintage-100/95 backdrop-blur-md border-b border-vintage-300 shadow-sm">
+        <div class="max-w-6xl mx-auto px-3 sm:px-6 lg:px-8 overflow-x-auto whitespace-nowrap custom-scrollbar">
+            <div class="flex items-center gap-1.5 py-2 min-w-max">
+                <button type="button" id="navTab-dictionary" onclick="switchMainTab('dictionary')" class="main-nav-btn active">
+                    <i class="fa-solid fa-book"></i>
+                    <span>Từ điển phương ngữ</span>
+                </button>
+                <button type="button" id="navTab-videos" onclick="switchMainTab('videos')" class="main-nav-btn">
+                    <i class="fa-solid fa-film"></i>
+                    <span>Video &amp; Ví Giặm</span>
+                </button>
+                <button type="button" id="navTab-community" onclick="switchMainTab('community')" class="main-nav-btn">
+                    <i class="fa-solid fa-users"></i>
+                    <span>Cộng đồng &amp; Di sản</span>
+                </button>
+                <button type="button" id="navTab-games" onclick="switchMainTab('games')" class="main-nav-btn">
+                    <i class="fa-solid fa-gamepad"></i>
+                    <span>Sân chơi Mini-game</span>
+                </button>
+                <button type="button" id="navTab-about" onclick="switchMainTab('about')" class="main-nav-btn">
+                    <i class="fa-solid fa-flask"></i>
+                    <span>Đề tài VISEF</span>
+                </button>
+                <button type="button" id="navTab-admin" onclick="switchMainTab('admin')" class="main-nav-btn hidden">
+                    <i class="fa-solid fa-shield-halved"></i>
+                    <span id="adminNavLabel" class="inline-flex items-center gap-1.5">Quản trị</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Search Section (hiện ở Tab Từ điển) -->
+    <div id="heroSection">
+    <section
+        class="relative bg-gradient-to-b from-[#2c251f] via-[#4a3f35] to-[#3a3028] text-vintage-50 py-14 sm:py-16 px-4 overflow-hidden">
+        <div
+            class="absolute inset-0 opacity-10 bg-[radial-gradient(#d1c4b0_1px,transparent_1px)] [background-size:16px_16px]">
+        </div>
+        <div class="max-w-3xl mx-auto text-center relative z-10 space-y-6">
+            <span
+                class="inline-flex items-center space-x-2 bg-vintage-900/80 border border-vintage-700 px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider text-amber-200">
+                <i class="fa-solid fa-feather text-amber-400"></i>
+                <span>Mô, tê, răng, rứa - Đậm đà hồn quê xứ Nghệ</span>
+            </span>
+            <h2 class="text-3xl sm:text-5xl font-extrabold tracking-tight font-serif leading-tight">
+                Hơi thở mộc mạc từ <span class="text-amber-400 italic">miền đất gió Lào</span>
+            </h2>
+            <p class="text-sm sm:text-base text-vintage-200 max-w-xl mx-auto font-light">
+                Tra cứu kho tàng phương ngữ, ca dao tục ngữ, dân ca Ví giặm, hình ảnh di sản văn hóa và không gian giao
+                tiếp đậm đà bản sắc Hà Tĩnh.
+            </p>
+
+            <!-- Search Bar -->
+            <div class="pt-2 max-w-xl mx-auto">
+                <div
+                    class="relative flex items-center shadow-2xl rounded-2xl overflow-hidden bg-white p-2 border border-vintage-300">
+                    <span class="pl-3 text-vintage-600 text-lg">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </span>
+                    <input type="text" id="searchInput" oninput="filterDictionary()"
+                        placeholder="Tìm kiếm từ vựng, ý nghĩa, câu ca dao (VD: đọi, ngái, nỏ, mần...)"
+                        class="w-full py-2.5 px-3 text-vintage-900 text-sm placeholder-vintage-600/50 focus:outline-none">
+                </div>
+            </div>
+        </div>
+    </section>
+    </div><!-- /#heroSection -->
+
+    <!-- Main Content Grid -->
+    <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 flex-grow w-full flex flex-col gap-6 sm:gap-8">
+
+        <!-- Admin Notification Banner -->
+        <div id="adminNoticeBar"
+            class="bg-amber-100 border-l-4 border-amber-600 p-4 rounded-r-2xl shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 hidden">
+            <div class="flex items-center space-x-3">
+                <div
+                    class="w-10 h-10 flex-shrink-0 bg-amber-600 text-white rounded-xl flex items-center justify-center font-bold">
+                    <i class="fa-solid fa-bell"></i>
+                </div>
+                <div>
+                    <h4 class="text-sm font-bold text-amber-900">Có từ vựng hoặc tư liệu văn hóa mới từ người dùng đang
+                        chờ bạn phê duyệt!</h4>
+                    <p class="text-xs text-amber-800">Chuyển sang bảng quản trị để kiểm tra và xử lý ngay.</p>
+                </div>
+            </div>
+            <button type="button" onclick="switchMainTab('admin', 'pending')"
+                class="bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold px-4 py-2 rounded-xl transition self-end sm:self-auto cursor-pointer">Kiểm
+                duyệt ngay</button>
+        </div>
+
+        <!-- TAB 1: Official Dictionary Section -->
+        <section id="panel-dictionary" class="scroll-mt-36 space-y-6">
+            <div
+                class="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-4 border-b border-vintage-300 gap-3">
+                <div>
+                    <h3 class="text-xl font-bold font-serif text-vintage-900">Từ Điển Phương Ngữ &amp; Ca Dao Tục Ngữ
+                    </h3>
+                    <p class="text-xs text-vintage-700">Lưu giữ kho tàng ngôn ngữ dân gian đặc trưng Hà Tĩnh</p>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <span id="adminImageEditNotice"
+                        class="hidden text-xs bg-amber-100 text-amber-900 px-3 py-1 rounded-xl font-semibold border border-amber-300">
+                        <i class="fa-solid fa-shield-halved mr-1"></i> Đang ở chế độ Admin: Sửa &amp; Xóa từ!
+                    </span>
+                    <span class="text-xs font-bold bg-vintage-200 px-3 py-1.5 rounded-xl text-vintage-800"
+                        id="resultCount">0 từ</span>
+                </div>
+            </div>
+
+            <!-- Bộ lọc chữ cái nhanh -->
+            <div id="letterFilter"
+                class="bg-vintage-50 border border-vintage-300 rounded-2xl p-3 flex flex-wrap items-center gap-1.5 shadow-sm">
+                <span class="text-[11px] font-bold text-vintage-700 mr-1"><i
+                        class="fa-solid fa-font text-terracotta mr-1"></i>Lọc chữ cái:</span>
+                <button type="button" data-letter="" onclick="filterByLetter('')" class="letter-btn active">Tất cả</button>
+                <button type="button" data-letter="A" onclick="filterByLetter('A')" class="letter-btn">A</button>
+                <button type="button" data-letter="B" onclick="filterByLetter('B')" class="letter-btn">B</button>
+                <button type="button" data-letter="C" onclick="filterByLetter('C')" class="letter-btn">C</button>
+                <button type="button" data-letter="D" onclick="filterByLetter('D')" class="letter-btn">D</button>
+                <button type="button" data-letter="Đ" onclick="filterByLetter('Đ')" class="letter-btn">Đ</button>
+                <button type="button" data-letter="E" onclick="filterByLetter('E')" class="letter-btn">E</button>
+                <button type="button" data-letter="G" onclick="filterByLetter('G')" class="letter-btn">G</button>
+                <button type="button" data-letter="H" onclick="filterByLetter('H')" class="letter-btn">H</button>
+                <button type="button" data-letter="K" onclick="filterByLetter('K')" class="letter-btn">K</button>
+                <button type="button" data-letter="L" onclick="filterByLetter('L')" class="letter-btn">L</button>
+                <button type="button" data-letter="M" onclick="filterByLetter('M')" class="letter-btn">M</button>
+                <button type="button" data-letter="N" onclick="filterByLetter('N')" class="letter-btn">N</button>
+                <button type="button" data-letter="O" onclick="filterByLetter('O')" class="letter-btn">O</button>
+                <button type="button" data-letter="P" onclick="filterByLetter('P')" class="letter-btn">P</button>
+                <button type="button" data-letter="Q" onclick="filterByLetter('Q')" class="letter-btn">Q</button>
+                <button type="button" data-letter="R" onclick="filterByLetter('R')" class="letter-btn">R</button>
+                <button type="button" data-letter="S" onclick="filterByLetter('S')" class="letter-btn">S</button>
+                <button type="button" data-letter="T" onclick="filterByLetter('T')" class="letter-btn">T</button>
+                <button type="button" data-letter="U" onclick="filterByLetter('U')" class="letter-btn">U</button>
+                <button type="button" data-letter="V" onclick="filterByLetter('V')" class="letter-btn">V</button>
+                <button type="button" data-letter="X" onclick="filterByLetter('X')" class="letter-btn">X</button>
+                <button type="button" data-letter="Y" onclick="filterByLetter('Y')" class="letter-btn">Y</button>
+            </div>
+
+            <div id="wordGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+
+            <div id="emptyState" class="hidden text-center py-16">
+                <div
+                    class="w-16 h-16 bg-vintage-200 rounded-full flex items-center justify-center mx-auto text-terracotta text-2xl mb-3">
+                    <i class="fa-solid fa-face-confused"></i>
+                </div>
+                <h4 class="text-base font-bold text-vintage-900 font-serif">Không tìm thấy từ vựng phương ngữ phù hợp
+                </h4>
+                <p class="text-xs text-vintage-700 mt-1">Hãy thử tìm từ khóa khác hoặc đóng góp thêm từ mới vào kho
+                    tàng!</p>
+            </div>
+
+            <div id="wordPagination" class="flex items-center justify-center gap-2 pt-4 flex-wrap"></div>
+        </section>
+
+        <!-- TAB 2: Video Giao Tiếp & Dân Ca Ví, Giặm -->
+        <section id="panel-videos"
+            class="hidden scroll-mt-36 bg-vintage-50 border border-vintage-300 rounded-3xl p-6 sm:p-10 shadow-sm space-y-6">
+            <div
+                class="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-4 border-b border-vintage-300 gap-4">
+                <div>
+                    <span
+                        class="bg-amber-600 text-white text-[10px] font-bold px-2.5 py-1 rounded-md uppercase tracking-wider">Không
+                        gian âm nhạc &amp; đời sống</span>
+                    <h3 class="text-xl sm:text-2xl font-bold font-serif text-vintage-900 mt-1">Video Giao Tiếp Phương
+                        Ngữ &amp; Dân Ca Ví, Giặm</h3>
+                    <p class="text-xs text-vintage-700">Trải nghiệm ngữ điệu nói hằng ngày và các làn điệu dân ca ví
+                        giặm phi vật thể.</p>
+                </div>
+                <div class="flex items-center space-x-2 flex-wrap gap-y-2">
+                    <button type="button" onclick="switchVideoTab('all')" id="tabVidAll"
+                        class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-terracotta text-white shadow cursor-pointer">Tất
+                        cả</button>
+                    <button type="button" onclick="switchVideoTab('communication')" id="tabVidComm"
+                        class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-vintage-200 text-vintage-800 hover:bg-vintage-300 cursor-pointer">Giao
+                        tiếp thường ngày</button>
+                    <button type="button" onclick="switchVideoTab('folksong')" id="tabVidSong"
+                        class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-vintage-200 text-vintage-800 hover:bg-vintage-300 cursor-pointer">Dân
+                        ca Ví Giặm</button>
+
+                    <button type="button" onclick="openVideoModal()"
+                        class="bg-vintage-800 hover:bg-vintage-900 text-white text-xs font-bold px-3.5 py-1.5 rounded-xl transition flex items-center gap-1.5 sm:ml-2 cursor-pointer">
+                        <i class="fa-solid fa-upload"></i> Thêm video tư liệu
+                    </button>
+                </div>
+            </div>
+
+            <div id="videoGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+
+            <div id="videoPagination" class="flex items-center justify-center gap-2 pt-4 flex-wrap"></div>
+        </section>
+
+        <!-- TAB 3: Trang Cộng Đồng & Góc Văn Hóa Hà Tĩnh -->
+        <section id="panel-community"
+            class="hidden scroll-mt-36 bg-vintage-50 border border-vintage-300 rounded-3xl p-6 sm:p-10 shadow-sm space-y-6">
+            <div
+                class="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-4 border-b border-vintage-300 gap-4">
+                <div>
+                    <span
+                        class="bg-sage text-white text-[10px] font-bold px-2.5 py-1 rounded-md uppercase tracking-wider">Góc
+                        di sản học đường</span>
+                    <h3 class="text-xl sm:text-2xl font-bold font-serif text-vintage-900 mt-1">Cộng Đồng &amp; Di Sản
+                        Văn Hóa Hà Tĩnh</h3>
+                    <p class="text-xs text-vintage-700">Chia sẻ câu chuyện làng nghề, danh nhân văn hóa, di tích lịch sử
+                        và ký ức quê hương.</p>
+                </div>
+                <button type="button" onclick="openCommunityModal()"
+                    class="bg-terracotta hover:bg-terracotta-dark text-white text-xs font-bold px-4 py-2.5 rounded-xl transition flex items-center gap-2 shadow-sm cursor-pointer">
+                    <i class="fa-solid fa-pen-to-square"></i> Đăng bài viết văn hóa
+                </button>
+            </div>
+
+            <div id="communityFeedGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+
+            <div id="communityPagination" class="flex items-center justify-center gap-2 pt-4 flex-wrap"></div>
+        </section>
+
+        <!-- TAB 4: Interactive Mini-Games Hub -->
+        <section id="panel-games"
+            class="hidden scroll-mt-36 bg-gradient-to-br from-vintage-800 to-vintage-900 text-vintage-50 rounded-3xl p-6 sm:p-10 shadow-xl border border-vintage-700">
+            <div class="max-w-3xl mx-auto space-y-6">
+                <div class="text-center space-y-3">
+                    <span
+                        class="bg-amber-400 text-vintage-900 text-[10px] font-extrabold px-3 py-1 rounded-full uppercase tracking-widest">
+                        <i class="fa-solid fa-gamepad mr-1"></i> Sân chơi phương ngữ Gen Z
+                    </span>
+                    <h3 class="text-2xl sm:text-3xl font-serif font-bold">Thử Thách Vốn Từ &amp; Văn Hóa Xứ Nghệ</h3>
+                    <p class="text-xs sm:text-sm text-vintage-200">Trải nghiệm 3 trò chơi kiểm tra vốn từ phương ngữ Hà
+                        Tĩnh vô cùng hấp dẫn!</p>
+
+                    <div class="flex flex-wrap justify-center gap-2 pt-2">
+                        <button type="button" onclick="switchGameMode('multipleChoice')" id="tabMultipleChoice"
+                            class="px-4 py-2 rounded-xl text-xs font-bold transition bg-terracotta text-white shadow cursor-pointer">1.
+                            Trắc nghiệm nghĩa từ</button>
+                        <button type="button" onclick="switchGameMode('fillBlank')" id="tabFillBlank"
+                            class="px-4 py-2 rounded-xl text-xs font-bold transition bg-vintage-700 text-vintage-200 hover:bg-vintage-600 cursor-pointer">2.
+                            Điền phương ngữ</button>
+                        <button type="button" onclick="switchGameMode('unscramble')" id="tabUnscramble"
+                            class="px-4 py-2 rounded-xl text-xs font-bold transition bg-vintage-700 text-vintage-200 hover:bg-vintage-600 cursor-pointer">3.
+                            Giải mã chữ cái</button>
+                    </div>
+                </div>
+
+                <div id="gameActiveBox"
+                    class="bg-vintage-50 text-vintage-900 rounded-2xl p-6 text-left shadow-lg border border-vintage-300">
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 5: VISEF Research Project Overview -->
+        <section id="panel-about"
+            class="hidden scroll-mt-36 bg-vintage-50 border border-vintage-300 rounded-3xl p-6 sm:p-10 shadow-sm space-y-8">
+            <div class="max-w-3xl mx-auto text-center space-y-2">
+                <span
+                    class="bg-sage-light text-sage font-bold text-[10px] px-3 py-1 rounded-full uppercase tracking-wider">Đề
+                    tài Nghiên cứu Khoa học Kỹ thuật (VISEF)</span>
+                <h3 class="text-2xl font-serif font-bold text-vintage-900">Ý Nghĩa Khoa Học &amp; Bảo Tồn Văn Hóa</h3>
+                <p class="text-xs sm:text-sm text-vintage-700 italic">"Giải pháp bảo tồn chủ động và phát huy giá trị
+                    phương ngữ Hà Tĩnh trong kỷ nguyên số"</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+                <div class="bg-vintage-100 p-6 rounded-2xl border border-vintage-300 space-y-3 shadow-sm">
+                    <h4 class="font-serif font-bold text-base text-terracotta flex items-center gap-2">
+                        <i class="fa-solid fa-book-open"></i> 1. Giá trị ngôn ngữ học
+                    </h4>
+                    <p class="text-vintage-800 text-xs sm:text-sm leading-relaxed">
+                        Phương ngữ Hà Tĩnh lưu giữ nhiều lớp từ cổ, vần điệu độc đáo và tư duy biểu đạt gắn liền với
+                        điều kiện địa lý, lịch sử của vùng đất gió Lào cát trắng. Đề tài hệ thống hóa kho tàng từ vựng
+                        để lưu truyền cho thế hệ học sinh mai sau.
+                    </p>
+                </div>
+
+                <div class="bg-vintage-100 p-6 rounded-2xl border border-vintage-300 space-y-3 shadow-sm">
+                    <h4 class="font-serif font-bold text-base text-terracotta flex items-center gap-2">
+                        <i class="fa-solid fa-seedling"></i> 2. Ứng dụng thực tiễn học đường
+                    </h4>
+                    <p class="text-vintage-800 text-xs sm:text-sm leading-relaxed">
+                        Xây dựng nền tảng số đa phương tiện giúp học sinh THPT trải nghiệm, học hỏi và gìn giữ bản sắc
+                        văn hóa quê hương một cách sinh động, hiện đại.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 6: Admin Approval & Content Management Panel (chỉ hiện khi isAdmin === true) -->
+        <section id="panel-admin" class="hidden scroll-mt-36">
+            <div id="adminPanelSection"
+                class="bg-vintage-50 border-2 border-dashed border-terracotta/40 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
+                <div
+                    class="flex flex-col sm:flex-row justify-between items-start sm:items-center pb-4 border-b border-vintage-300 gap-4">
+                    <div>
+                        <span
+                            class="bg-terracotta text-white text-[10px] font-bold px-2.5 py-1 rounded-md uppercase tracking-wider">Quản
+                            trị hệ thống</span>
+                        <h3 class="text-xl font-bold font-serif text-vintage-900 mt-1">Bảng Phê Duyệt &amp; Quản Trị Đóng
+                            Góp</h3>
+                        <p class="text-xs text-vintage-700">Mọi thao tác duyệt, sửa, xóa được lưu trực tiếp lên cơ sở dữ
+                            liệu đám mây Supabase và đồng bộ tức thì.</p>
+                    </div>
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <button type="button" onclick="syncFromCloud(true)"
+                            class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3.5 py-2 rounded-xl transition shadow-sm cursor-pointer">
+                            <i class="fa-solid fa-rotate mr-1"></i> Làm mới dữ liệu
+                        </button>
+                        <button type="button" onclick="exportDataJSON()"
+                            class="bg-sage hover:bg-sage/80 text-white text-xs font-bold px-3.5 py-2 rounded-xl transition shadow-sm cursor-pointer">
+                            <i class="fa-solid fa-download mr-1"></i> Xuất JSON
+                        </button>
+                        <label
+                            class="bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold px-3.5 py-2 rounded-xl transition shadow-sm cursor-pointer">
+                            <i class="fa-solid fa-upload mr-1"></i> Nhập JSON
+                            <input type="file" id="importFile" accept=".json" onchange="importDataJSON(event)"
+                                class="hidden">
+                        </label>
+                        <span id="pendingCountBadge"
+                            class="bg-amber-500 text-white text-xs font-bold px-3 py-1.5 rounded-full">0 chờ duyệt</span>
+                    </div>
+                </div>
+
+                <!-- 4 Sub-tabs bên trong Quản trị -->
+                <div class="flex flex-wrap items-center gap-2 pb-2 border-b border-vintage-200">
+                    <button type="button" id="adminSubTab-pending" onclick="switchAdminSubTab('pending')"
+                        class="admin-sub-btn active">
+                        <i class="fa-solid fa-clock-rotate-left"></i> Chờ duyệt (0)
+                    </button>
+                    <button type="button" id="adminSubTab-words" onclick="switchAdminSubTab('words')"
+                        class="admin-sub-btn">
+                        <i class="fa-solid fa-book"></i> Từ vựng (0)
+                    </button>
+                    <button type="button" id="adminSubTab-videos" onclick="switchAdminSubTab('videos')"
+                        class="admin-sub-btn">
+                        <i class="fa-solid fa-video"></i> Video (0)
+                    </button>
+                    <button type="button" id="adminSubTab-posts" onclick="switchAdminSubTab('posts')"
+                        class="admin-sub-btn">
+                        <i class="fa-solid fa-id-card"></i> Bài viết (0)
+                    </button>
+                </div>
+
+                <!-- Sub-panel 1: Chờ duyệt -->
+                <div id="adminSubPanel-pending" class="space-y-4">
+                    <div id="pendingListContainer" class="space-y-4"></div>
+                    <div id="noPendingMsg"
+                        class="text-center py-8 text-vintage-700 text-xs italic bg-vintage-100 rounded-2xl border border-vintage-200">
+                        Hiện không có đóng góp nào đang chờ phê duyệt.
+                    </div>
+                </div>
+
+                <!-- Sub-panel 2: Quản lý Từ vựng -->
+                <div id="adminSubPanel-words" class="hidden space-y-4">
+                    <div class="relative">
+                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-vintage-600 text-xs"><i
+                                class="fa-solid fa-magnifying-glass"></i></span>
+                        <input type="text" id="adminWordSearch" oninput="filterAdminWordList()"
+                            placeholder="Tìm nhanh theo từ vựng hoặc nghĩa..."
+                            class="w-full bg-vintage-100 border border-vintage-300 rounded-xl pl-8 pr-3 py-2 text-xs focus:ring-2 focus:ring-terracotta focus:outline-none text-vintage-900">
+                    </div>
+                    <div id="adminWordListContainer" class="space-y-2.5"></div>
+                    <div id="adminWordPagination" class="flex items-center justify-center gap-2 pt-2 flex-wrap"></div>
+                </div>
+
+                <!-- Sub-panel 3: Quản lý Video -->
+                <div id="adminSubPanel-videos" class="hidden space-y-4">
+                    <div class="relative">
+                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-vintage-600 text-xs"><i
+                                class="fa-solid fa-magnifying-glass"></i></span>
+                        <input type="text" id="adminVideoSearch" oninput="filterAdminVideoList()"
+                            placeholder="Tìm nhanh video theo tiêu đề..."
+                            class="w-full bg-vintage-100 border border-vintage-300 rounded-xl pl-8 pr-3 py-2 text-xs focus:ring-2 focus:ring-terracotta focus:outline-none text-vintage-900">
+                    </div>
+                    <div id="adminVideoListContainer" class="space-y-2.5"></div>
+                    <div id="adminVideoPagination" class="flex items-center justify-center gap-2 pt-2 flex-wrap"></div>
+                </div>
+
+                <!-- Sub-panel 4: Quản lý Bài viết -->
+                <div id="adminSubPanel-posts" class="hidden space-y-4">
+                    <div class="relative">
+                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-vintage-600 text-xs"><i
+                                class="fa-solid fa-magnifying-glass"></i></span>
+                        <input type="text" id="adminPostSearch" oninput="filterAdminPostList()"
+                            placeholder="Tìm nhanh bài viết theo tiêu đề hoặc tác giả..."
+                            class="w-full bg-vintage-100 border border-vintage-300 rounded-xl pl-8 pr-3 py-2 text-xs focus:ring-2 focus:ring-terracotta focus:outline-none text-vintage-900">
+                    </div>
+                    <div id="adminCommunityListContainer" class="space-y-2.5"></div>
+                    <div id="adminPostPagination" class="flex items-center justify-center gap-2 pt-2 flex-wrap"></div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-vintage-900 text-vintage-200 py-8 border-t border-vintage-800 text-xs text-center mt-12">
+        <div class="max-w-6xl mx-auto px-4 space-y-2">
+            <p>© 2026 Từ điển số đa phương tiện Tiếng Hà Tĩnh • Đề tài KHKT (VISEF)</p>
+            <p class="text-vintage-400">Gìn giữ nét đẹp phương ngữ xứ Nghệ trong kỷ nguyên số.</p>
+        </div>
+    </footer>
+
+    <!-- Modal: Admin Login -->
+    <div id="adminLoginModal"
+        class="fixed inset-0 z-50 hidden bg-vintage-900/70 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-vintage-50 w-full max-w-md rounded-3xl shadow-2xl p-6 space-y-5 border border-vintage-300">
+            <div class="flex items-center justify-between border-b border-vintage-200 pb-3">
+                <h3 class="text-lg font-bold font-serif text-vintage-900"><i
+                        class="fa-solid fa-shield-halved text-terracotta mr-1.5"></i> Đăng nhập Quản trị viên</h3>
+                <button type="button" onclick="closeAdminLoginModal()"
+                    class="text-vintage-700 hover:text-vintage-900 cursor-pointer"><i
+                        class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form id="adminLoginForm" onsubmit="submitAdminLogin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-[10px] font-bold text-vintage-800 uppercase mb-1">Email quản trị *</label>
+                    <input type="email" id="adminEmailInput" required placeholder="Nhập email tài khoản Admin..."
+                        class="w-full bg-vintage-100 border border-vintage-300 rounded-xl px-3.5 py-2.5 text-xs focus:ring-2 focus:ring-terracotta focus:outline-none text-vintage-900">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-vintage-800 uppercase mb-1">Mật khẩu *</label>
+                    <input type="password" id="adminPasswordInput" required placeholder="Nhập mật khẩu..."
+                        class="w-full bg-vintage-100 border border-vintage-300 rounded-xl px-3.5 py-2.5 text-xs focus:ring-2 focus:ring-terracotta focus:outline-none text-vintage-900">
+                </div>
+                <div class="flex justify-end space-x-2 pt-2">
+                    <button type="button" onclick="closeAdminLoginModal()"
+                        class="bg-vintage-200 hover:bg-vintage-300 text-vintage-900 text-xs font-semibold px-4 py-2 rounded-xl transition cursor-pointer">Hủy</button>
+                    <button type="submit" id="adminLoginSubmitBtn"
+                        class="bg-terracotta hover:bg-terracotta-dark text-white text-xs font-semibold px-5 py-2 rounded-xl shadow transition cursor-pointer">Đăng
+                        nhập</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Word Detail -->
+    <div id="detailModal"
+        class="fixed inset-0 z-50 hidden bg-vintage-900/70 backdrop-blur-sm flex items-center justify-center p-4">
+        <div
+            class="bg-vintage-50 w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden flex flex-col border border-vintage-300 max-h-[90vh]">
+            <div class="relative h-48 bg-vintage-200">
+                <img id="modalImage" src="https://placehold.co/600x400/d1c4b0/4a3f35?text=Tiếng+Hà+Tĩnh" alt="Minh họa"
+                    class="w-full h-full object-cover"
+                    onerror="this.src='https://placehold.co/600x400/d1c4b0/4a3f35?text=Tiếng+Hà+Tĩnh'">
+                <div class="absolute inset-0 bg-gradient-to-t from-vintage-900/80 via-transparent to-transparent"></div>
+                <button type="button" onclick="closeModal()"
+                    class="absolute top-4 right-4 w-8 h-8 bg-black/40 hover:bg-black/60 text-white rounded-full flex items-center justify-center transition cursor-pointer">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+                <div class="absolute bottom-4 left-6 right-6 flex items-end justify-between">
+                    <div>
+                        <span
+                            class="inline-block bg-terracotta text-white text-[10px] font-bold px-2.5 py-1 rounded-md uppercase tracking-wider mb-1">Phương
+                            ngữ Hà Tĩnh</span>
+                        <h3 id="modalWord" class="text-3xl font-extrabold text-white font-serif"></h3>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button type="button" id="modalEditImgBtn" onclick="promptEditImageFromModal()"
+                            class="hidden w-10 h-10 bg-amber-600 hover:bg-amber-700 text-white rounded-2xl flex items-center justify-center shadow-lg transition cursor-pointer"
+                            title="Sửa ảnh minh họa">
+                            <i class="fa-solid fa-pen text-xs"></i>
+                        </button>
+                        <button type="button" id="modalDeleteWordBtn" onclick="promptDeleteWordFromModal()"
+                            class="hidden w-10 h-10 bg-rose-600 hover:bg-rose-700 text-white rounded-2xl flex items-center justify-center shadow-lg transition cursor-pointer"
+                            title="Xóa từ vựng này">
+                            <i class="fa-solid fa-trash text-xs"></i>
+                        </button>
+                        <button type="button" onclick="speakNativeWord()"
+                            class="w-11 h-11 bg-amber-400 hover:bg-amber-500 text-vintage-900 rounded-2xl flex items-center justify-center shadow-lg transition transform active:scale-95 cursor-pointer"
+                            title="Nghe phát âm chuẩn (Web Speech API)">
+                            <i class="fa-solid fa-volume-high text-base"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-6 space-y-4 overflow-y-auto custom-scrollbar flex-grow">
+                <div>
+                    <h4 class="text-[10px] font-bold uppercase tracking-wider text-vintage-700/60 mb-1">Nghĩa tiếng phổ
+                        thông</h4>
+                    <p id="modalMeaning" class="text-lg font-bold text-vintage-900 font-serif"></p>
+                </div>
+
+                <div>
+                    <h4 class="text-[10px] font-bold uppercase tracking-wider text-vintage-700/60 mb-1">Ngữ cảnh sinh
+                        hoạt thực tế</h4>
+                    <p id="modalContext"
+                        class="text-sm bg-vintage-100 border-l-4 border-terracotta p-3 rounded-r-xl text-vintage-900 italic">
+                    </p>
+                </div>
+
+                <div>
+                    <h4 class="text-[10px] font-bold uppercase tracking-wider text-vintage-700/60 mb-1">Không gian Ca
+                        dao &amp; Ví giặm</h4>
+                    <div id="modalPoetry"
+                        class="text-sm bg-amber-50 border border-amber-200 p-3.5 rounded-2xl text-amber-900 font-serif leading-relaxed">
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-4 bg-vintage-100 border-t border-vintage-200 flex justify-end">
+                <button type="button" onclick="closeModal()"
+                    class="bg-vintage-300 hover:bg-vintage-400 text-vintage-900 text-xs font-semibold px-5 py-2.5 rounded-xl transition cursor-pointer">Đóng</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Add Single Word -->
+    <div id="contributeModal"
+        class="fixed inset-0 z-50 hidden bg-vintage-900/70 backdrop-blur-sm flex items-center justify-center p-4">
+        <div
+            class="bg-vintage-50 w-full max-w-xl rounded-3xl shadow-2xl p-6 space-y-5 border border-vintage-300 max-h-[90vh] overflow-y-auto custom-scrollbar">
+            <div class="flex items-center justify-between border-b border-vintage-200 pb-3">
+                <h3 class="text-lg font-bold font-serif text-vintage-900">Đóng góp từ phương ngữ mới</h3>
+                <button type="button" onclick="closeAddModal()"
+                    class="text-vintage-700 hover:text-vintage-900 cursor-pointer"><i
+                        class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+
+            <form id="singleWordForm" onsubmit="submitNewWord(event)" class="space-y-3">
+                <div class="bg-amber-50 border border-amber-200 p-3 rounded-xl text-xs text-amber-900">
+                    <i class="fa-solid fa-circle-info mr-1"></i> Đóng góp của bạn sẽ được kiểm duyệt trước khi đưa lên
+                    từ điển chính thức.
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-vintage-800 uppercase mb-1">Từ địa phương Hà Tĩnh
+                        *</label>
+                    <input type="text" id="contribWord" required placeholder="VD: Rứa, tê, mần, đọi..."
+                        class="w-full bg-vintage-100 border border-vintage-300 rounded-xl px-3.5 py-2 text-xs focus:ring-2 focus:ring-terracotta focus:outline-none text-vintage-900">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-vintage-800 uppercase mb-1">Nghĩa tiếng phổ thông
+                        *</label>
+                    <input type="text" id="contribMeaning" required placeholder="VD: Thế, kia, làm, bát ăn cơm..."
+                        class="w-full bg-vintage-100 border border-vintage-300 rounded-xl px-3.5 py-2 text-xs focus:ring-2 focus:ring-terracotta focus:outline-none text-vintage-900">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-vintage-800 uppercase mb-1">Chọn ảnh minh họa từ
+                        thiết bị (hoặc dán URL)</label>
+                    <input type="file" id="contribImageFile" accept="image/*"
+                        class="w-full bg-vintage-100 border border-vintage-300 rounded-xl px-3.5 py-2 text-xs focus:outline-none text-vintage-900 mb-2">
+                    <input type="url" id="contribImage" placeholder="Hoặc dán link ảnh https://..."
+                        class="w-full bg-vintage-100 border border-vintage-300 rounded-xl px-3.5 py-2 text-xs focus:ring-2 focus:ring-terracotta focus:outline-none text-vintage-900">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-vintage-800 uppercase mb-1">Ngữ cảnh sinh hoạt thực
+                        tế</label>
+                    <textarea id="contribContext" rows="2" placeholder="VD: Mần răng mà rứa..."
+                        class="w-full bg-vintage-100 border border-vintage-300 rounded-xl px-3.5 py-2 text-xs focus:ring-2 focus:ring-terracotta focus:outline-none text-vintage-900"></textarea>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-vintage-800 uppercase mb-1">Ca dao / Câu nói dân gian
+                        liên quan</label>
+                    <textarea id="contribPoetry" rows="2" placeholder="VD: Chưa nghe ví giặm chưa về..."
+                        class="w-full bg-vintage-100 border border-vintage-300 rounded-xl px-3.5 py-2 text-xs focus:ring-2 focus:ring-terracotta focus:outline-none text-vintage-900"></textarea>
+                </div>
+
+                <div class="flex justify-end space-x-2 pt-2">
+                    <button type="button" onclick="closeAddModal()"
+                        class="bg-vintage-200 hover:bg-vintage-300 text-vintage-900 text-xs font-semibold px-4 py-2 rounded-xl transition cursor-pointer">Hủy</button>
+                    <button type="submit"
+                        class="bg-terracotta hover:bg-terracotta-dark text-white text-xs font-semibold px-4 py-2 rounded-xl shadow transition cursor-pointer">Gửi
+                        đóng góp</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Batch Upload / Import Multiple Words from File -->
+    <div id="batchModal"
+        class="fixed inset-0 z-50 hidden bg-vintage-900/70 backdrop-blur-sm flex items-center justify-center p-4">
+        <div
+            class="bg-vintage-50 w-full max-w-xl rounded-3xl shadow-2xl p-6 space-y-5 border border-vintage-300 max-h-[90vh] overflow-y-auto custom-scrollbar">
+            <div class="flex items-center justify-between border-b border-vintage-200 pb-3">
+                <h3 class="text-lg font-bold font-serif text-vintage-900">Tải lên danh sách nhiều từ vựng (Từ tệp JSON)
+                </h3>
+                <button type="button" onclick="closeBatchModal()"
+                    class="text-vintage-700 hover:text-vintage-900 cursor-pointer"><i
+                        class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+
+            <div class="space-y-4 text-xs text-vintage-800">
+                <div class="bg-sage-light border border-sage p-3.5 rounded-2xl space-y-2">
+                    <p class="font-bold text-vintage-900"><i class="fa-solid fa-file-code text-sage mr-1"></i> Hướng dẫn
+                        định dạng tệp JSON:</p>
+                    <p>Tải lên tệp `.json` chứa danh sách các từ vựng theo mẫu sau để hệ thống tự động thêm hàng loạt:
+                    </p>
+                    <pre class="bg-vintage-900 text-amber-200 p-2.5 rounded-xl overflow-x-auto font-mono text-[10px]">[
+  {
+    "word": "Mần",
+    "meaning": "Làm",
+    "context": "Đang mần chi rứa?",
+    "poetry": "Mạ hỡi mạ, chiều nay mần chi?",
+    "image": "https://images.unsplash.com/..."
+  }
+]</pre>
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-bold text-vintage-800 uppercase mb-1.5">Chọn tệp JSON chứa danh
+                        sách từ vựng *</label>
+                    <input type="file" id="batchFileinput" accept=".json"
+                        class="w-full bg-vintage-100 border border-vintage-300 rounded-xl px-3.5 py-2.5 text-xs text-vintage-900 cursor-pointer">
+                </div>
+
+                <div class="flex justify-end space-x-2 pt-2">
+                    <button type="button" onclick="closeBatchModal()"
+                        class="bg-vintage-200 hover:bg-vintage-300 text-vintage-900 text-xs font-semibold px-4 py-2 rounded-xl transition cursor-pointer">Hủy</button>
+                    <button type="button" onclick="processBatchUpload()"
+                        class="bg-sage hover:bg-sage/80 text-white text-xs font-semibold px-5 py-2.5 rounded-xl shadow transition cursor-pointer">Nhập
+                        danh sách từ</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Add New YouTube Video -->
+    <div id="videoModal"
+        class="fixed inset-0 z-50 bg-vintage-900/70 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div
+            class="bg-vintage-50 w-full max-w-xl rounded-3xl shadow-2xl p-6 space-y-5 border border-vintage-300 max-h-[90vh] overflow-y-auto custom-scrollbar">
+            <div class="flex items-center justify-between border-b border-vintage-200 pb-3">
+                <h3 class="text-lg font-bold font-serif text-vintage-900">Thêm video tư liệu phương ngữ &amp; dân ca
+                </h3>
+                <button type="button" onclick="closeVideoModal()"
+                    class="text-vintage-700 hover:text-vintage-900 cursor-pointer"><i
+                        class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+
+            <form id="videoForm" onsubmit="submitNewVideo(event)" class="space-y-4">
+                <div>
+                    <label class="block text-[10px] font-bold text-vintage-800 uppercase mb-1">Tiêu đề video *</label>
+                    <input type="text" id="vidTitle" required placeholder="VD: Trích đoạn dân ca Ví giặm xứ Nghệ..."
+                        class="w-full bg-vintage-100 border border-vintage-300 rounded-xl px-3.5 py-2.5 text-xs focus:outline-none text-vintage-900">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-vintage-800 uppercase mb-1">Loại tư liệu *</label>
+                    <select id="vidCategory"
+                        class="w-full bg-vintage-100 border border-vintage-300 rounded-xl px-3.5 py-2.5 text-xs focus:outline-none text-vintage-900">
+                        <option value="communication">Giao tiếp thường ngày</option>
+                        <option value="folksong">Dân ca Ví, Giặm</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-vintage-800 uppercase mb-1">Đường dẫn YouTube (URL)
+                        *</label>
+                    <input type="text" id="vidUrl" required
+                        placeholder="VD: https://www.youtube.com/watch?v=... hoặc link Shorts"
+                        class="w-full bg-vintage-100 border border-vintage-300 rounded-xl px-3.5 py-2.5 text-xs focus:outline-none text-vintage-900">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-vintage-800 uppercase mb-1">Mô tả giá trị văn
+                        hóa</label>
+                    <textarea id="vidDesc" rows="2" placeholder="Ghi lại nét đặc sắc trong ngữ điệu hoặc làn điệu..."
+                        class="w-full bg-vintage-100 border border-vintage-300 rounded-xl px-3.5 py-2.5 text-xs focus:outline-none text-vintage-900"></textarea>
+                </div>
+                <div class="flex justify-end space-x-2 pt-2">
+                    <button type="button" onclick="closeVideoModal()"
+                        class="bg-vintage-200 text-vintage-900 text-xs font-semibold px-4 py-2.5 rounded-xl cursor-pointer">Hủy</button>
+                    <button type="submit"
+                        class="bg-terracotta text-white text-xs font-semibold px-5 py-2.5 rounded-xl shadow cursor-pointer">Gửi
+                        video lên</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Add New Community Post -->
+    <div id="communityModal"
+        class="fixed inset-0 z-50 bg-vintage-900/70 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div
+            class="bg-vintage-50 w-full max-w-xl rounded-3xl shadow-2xl p-6 space-y-5 border border-vintage-300 max-h-[90vh] overflow-y-auto custom-scrollbar">
+            <div class="flex items-center justify-between border-b border-vintage-200 pb-3">
+                <h3 class="text-lg font-bold font-serif text-vintage-900">Đăng bài viết di sản &amp; văn hóa Hà Tĩnh
+                </h3>
+                <button type="button" onclick="closeCommunityModal()"
+                    class="text-vintage-700 hover:text-vintage-900 cursor-pointer"><i
+                        class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form id="communityForm" onsubmit="submitNewCommunityPost(event)" class="space-y-3">
+                <div>
+                    <label class="block text-[10px] font-bold text-vintage-800 uppercase mb-1">Tiêu đề bài viết / Di sản
+                        *</label>
+                    <input type="text" id="commTitle" required
+                        placeholder="VD: Ký ức phiên chợ quê, Làng nghề truyền thống..."
+                        class="w-full bg-vintage-100 border border-vintage-300 rounded-xl px-3.5 py-2 text-xs text-vintage-900">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-vintage-800 uppercase mb-1">Tác giả / Học sinh thực
+                        hiện *</label>
+                    <input type="text" id="commAuthor" required placeholder="VD: Nguyễn Thị Hoa - Lớp 11..."
+                        class="w-full bg-vintage-100 border border-vintage-300 rounded-xl px-3.5 py-2 text-xs text-vintage-900">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-vintage-800 uppercase mb-1">Chọn ảnh bài viết từ
+                        thiết bị (hoặc dán URL)</label>
+                    <input type="file" id="commImageFile" accept="image/*"
+                        class="w-full bg-vintage-100 border border-vintage-300 rounded-xl px-3.5 py-2 text-xs text-vintage-900 mb-2">
+                    <input type="url" id="commImage" placeholder="Hoặc dán link https://..."
+                        class="w-full bg-vintage-100 border border-vintage-300 rounded-xl px-3.5 py-2 text-xs text-vintage-900">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-vintage-800 uppercase mb-1">Nội dung câu chuyện văn
+                        hóa *</label>
+                    <textarea id="commContent" rows="4" required
+                        placeholder="Chia sẻ cảm nhận, câu chuyện hoặc giá trị lịch sử văn hóa Hà Tĩnh..."
+                        class="w-full bg-vintage-100 border border-vintage-300 rounded-xl px-3.5 py-2 text-xs text-vintage-900"></textarea>
+                </div>
+                <div class="flex justify-end space-x-2 pt-2">
+                    <button type="button" onclick="closeCommunityModal()"
+                        class="bg-vintage-200 text-vintage-900 text-xs font-semibold px-4 py-2 rounded-xl cursor-pointer">Hủy</button>
+                    <button type="submit"
+                        class="bg-terracotta text-white text-xs font-semibold px-4 py-2 rounded-xl shadow cursor-pointer">Gửi
+                        bài đăng</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast"
+        class="fixed bottom-6 right-6 z-50 transform transition-all duration-300 bg-vintage-900 text-vintage-50 px-4 py-3 rounded-2xl shadow-xl flex items-center space-x-2 text-xs font-medium border border-vintage-700 pointer-events-none translate-y-24 opacity-0">
+        <i class="fa-solid fa-circle-check text-amber-400 text-base"></i>
+        <span id="toastMsg">Đã duyệt bài viết!</span>
+    </div>
+
+    <!-- Application Script -->
+    <script type="module" src="js/app.js"></script>
+</body>
+
+</html>
