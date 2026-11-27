@@ -23,6 +23,7 @@ const state = {
     pendingPosts: [],
     currentVideoTab: 'all',
     selectedWordId: null,
+    selectedPostId: null,
     activeTab: 'dictionary',       // 'dictionary' | 'videos' | 'community' | 'games' | 'about' | 'admin'
     activeAdminSubTab: 'pending',  // 'pending' | 'words' | 'videos' | 'posts'
     activeLetter: '',
@@ -47,6 +48,69 @@ function escapeHtml(str) {
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#039;');
+}
+
+function sanitizeHttpUrl(url) {
+    if (!url) return null;
+    const trimmed = String(url).trim();
+    if (!trimmed) return null;
+    try {
+        const parsed = new URL(trimmed);
+        if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
+            return parsed.href;
+        }
+    } catch {
+        return null;
+    }
+    return null;
+}
+
+function linkifySafeText(text) {
+    if (!text) return '';
+    const str = String(text);
+    const urlRegex = /https?:\/\/[^\s<>"'`]+/gi;
+    let result = '';
+    let lastIndex = 0;
+
+    for (const match of str.matchAll(urlRegex)) {
+        const matchIndex = match.index;
+        let rawUrl = match[0];
+        let trailing = '';
+
+        while (rawUrl.length > 0) {
+            const lastChar = rawUrl.slice(-1);
+            if (/[.,;:!?]/.test(lastChar)) {
+                trailing = lastChar + trailing;
+                rawUrl = rawUrl.slice(0, -1);
+            } else if (lastChar === ')') {
+                const opens = (rawUrl.match(/\(/g) || []).length;
+                const closes = (rawUrl.match(/\)/g) || []).length;
+                if (closes > opens) {
+                    trailing = lastChar + trailing;
+                    rawUrl = rawUrl.slice(0, -1);
+                } else {
+                    break;
+                }
+            } else {
+                break;
+            }
+        }
+
+        result += escapeHtml(str.slice(lastIndex, matchIndex));
+
+        const safeUrl = sanitizeHttpUrl(rawUrl);
+        if (safeUrl) {
+            result += `<a href="${escapeHtml(safeUrl)}" target="_blank" rel="noopener noreferrer" class="text-terracotta underline hover:text-terracotta-dark font-medium break-all">${escapeHtml(rawUrl)}</a>`;
+        } else {
+            result += escapeHtml(rawUrl);
+        }
+
+        result += escapeHtml(trailing);
+        lastIndex = matchIndex + match[0].length;
+    }
+
+    result += escapeHtml(str.slice(lastIndex));
+    return result;
 }
 
 function extractYouTubeId(url) {
@@ -741,23 +805,39 @@ function renderCommunityPosts() {
     state.communityPage = currentPage;
 
     grid.innerHTML = pageItems.map(post => {
-        const imgSrc = post.image_url || DEFAULT_COMMUNITY_IMG;
+        const imgSrc = sanitizeHttpUrl(post.image_url) || DEFAULT_COMMUNITY_IMG;
+        const safeSourceUrl = sanitizeHttpUrl(post.source_url);
         const deleteBtn = state.isAdmin ? `
-            <button type="button" onclick="deleteOfficialCommunity(${post.id})" class="absolute top-3 right-3 bg-rose-600 hover:bg-rose-700 text-white text-xs w-8 h-8 rounded-full flex items-center justify-center shadow-md cursor-pointer" title="Xóa bài viết">
+            <button type="button" onclick="event.stopPropagation(); deleteOfficialCommunity(${post.id})" class="absolute top-3 right-3 z-10 bg-rose-600 hover:bg-rose-700 text-white text-xs w-8 h-8 rounded-full flex items-center justify-center shadow-md cursor-pointer" title="Xóa bài viết">
                 <i class="fa-solid fa-trash text-[10px]"></i>
             </button>
         ` : '';
 
+        const sourceBtn = safeSourceUrl ? `
+            <a href="${escapeHtml(safeSourceUrl)}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()"
+                class="inline-flex items-center gap-1 text-[11px] font-bold text-sage hover:text-vintage-900 bg-sage-light border border-sage/30 px-2.5 py-1 rounded-lg transition">
+                <span>Đọc bài gốc</span>
+                <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+            </a>
+        ` : '';
+
         return `
-            <div class="bg-vintage-100 rounded-3xl overflow-hidden border border-vintage-300 shadow-sm flex flex-col justify-between relative">
-                <div class="relative h-48 bg-vintage-200">
-                    <img src="${escapeHtml(imgSrc)}" alt="${escapeHtml(post.title)}" class="w-full h-full object-cover" onerror="this.onerror=null;this.src='${DEFAULT_COMMUNITY_IMG}'">
-                    ${deleteBtn}
+            <div onclick="openCommunityDetail(${post.id})"
+                class="bg-vintage-100 rounded-3xl overflow-hidden border border-vintage-300 shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col justify-between relative cursor-pointer group">
+                <div>
+                    <div class="relative h-48 bg-vintage-200 overflow-hidden">
+                        <img src="${escapeHtml(imgSrc)}" alt="${escapeHtml(post.title)}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" onerror="this.onerror=null;this.src='${DEFAULT_COMMUNITY_IMG}'">
+                        ${deleteBtn}
+                    </div>
+                    <div class="p-5 space-y-2">
+                        <span class="text-[11px] font-semibold text-terracotta"><i class="fa-solid fa-user-pen mr-1"></i> ${escapeHtml(post.author)}</span>
+                        <h4 class="font-serif font-bold text-base text-vintage-900 line-clamp-1 group-hover:text-terracotta transition">${escapeHtml(post.title)}</h4>
+                        <p class="text-xs text-vintage-700 line-clamp-3">${escapeHtml(post.content)}</p>
+                    </div>
                 </div>
-                <div class="p-5 space-y-2 flex-grow">
-                    <span class="text-[11px] font-semibold text-terracotta"><i class="fa-solid fa-user-pen mr-1"></i> ${escapeHtml(post.author)}</span>
-                    <h4 class="font-serif font-bold text-base text-vintage-900 line-clamp-1">${escapeHtml(post.title)}</h4>
-                    <p class="text-xs text-vintage-700 line-clamp-3">${escapeHtml(post.content)}</p>
+                <div class="px-5 pb-4 pt-2 border-t border-vintage-200/80 flex items-center justify-between gap-2">
+                    <div>${sourceBtn}</div>
+                    <span class="text-[11px] font-semibold text-terracotta group-hover:translate-x-0.5 transition-transform ml-auto">Xem chi tiết →</span>
                 </div>
             </div>
         `;
@@ -765,6 +845,44 @@ function renderCommunityPosts() {
 
     renderPagination('communityPagination', state.approvedPosts.length, currentPage, totalPages, 'setCommunityPage');
 }
+
+window.openCommunityDetail = function (id) {
+    const post = state.approvedPosts.find(p => p.id === id)
+        || (state.isAdmin ? state.pendingPosts.find(p => p.id === id) : null);
+    if (!post) return;
+
+    state.selectedPostId = id;
+    const imgSrc = sanitizeHttpUrl(post.image_url) || DEFAULT_COMMUNITY_IMG;
+    const safeSourceUrl = sanitizeHttpUrl(post.source_url);
+
+    const imgEl = document.getElementById('commDetailImage');
+    const titleEl = document.getElementById('commDetailTitle');
+    const authorEl = document.getElementById('commDetailAuthor');
+    const contentEl = document.getElementById('commDetailContent');
+    const sourceBtn = document.getElementById('commDetailSourceBtn');
+
+    if (imgEl) imgEl.src = imgSrc;
+    if (titleEl) titleEl.textContent = post.title || '';
+    if (authorEl) authorEl.innerHTML = `<i class="fa-solid fa-user-pen"></i> <span>${escapeHtml(post.author || '')}</span>`;
+    if (contentEl) contentEl.innerHTML = linkifySafeText(post.content || '');
+
+    if (sourceBtn) {
+        if (safeSourceUrl) {
+            sourceBtn.href = safeSourceUrl;
+            sourceBtn.classList.remove('hidden');
+        } else {
+            sourceBtn.href = '#';
+            sourceBtn.classList.add('hidden');
+        }
+    }
+
+    document.getElementById('communityDetailModal')?.classList.remove('hidden');
+};
+
+window.closeCommunityDetail = function () {
+    document.getElementById('communityDetailModal')?.classList.add('hidden');
+    state.selectedPostId = null;
+};
 
 // --- ĐÓNG GÓP NỘI DUNG MỚI (GỬI CHỜ DUYỆT) ---
 window.openAddModal = () => document.getElementById('contributeModal')?.classList.remove('hidden');
@@ -922,14 +1040,27 @@ window.submitNewCommunityPost = async function (event) {
     const author = document.getElementById('commAuthor').value.trim();
     const content = document.getElementById('commContent').value.trim();
     const imageUrlInput = document.getElementById('commImage').value.trim();
+    const sourceUrlInput = document.getElementById('commSourceUrl')?.value.trim() || '';
     const imageFile = document.getElementById('commImageFile').files[0];
+
+    const safeSourceUrl = sourceUrlInput ? sanitizeHttpUrl(sourceUrlInput) : null;
+    if (sourceUrlInput && !safeSourceUrl) {
+        showToast('Đường dẫn bài báo / nguồn tham khảo phải bắt đầu bằng http:// hoặc https://!', true);
+        return;
+    }
+
+    const safeImageInputUrl = imageUrlInput ? sanitizeHttpUrl(imageUrlInput) : null;
+    if (!imageFile && imageUrlInput && !safeImageInputUrl) {
+        showToast('Đường dẫn ảnh trực tiếp phải bắt đầu bằng http:// hoặc https://!', true);
+        return;
+    }
 
     const submitBtn = event.target.querySelector('button[type="submit"]');
     try {
         submitBtn.disabled = true;
         submitBtn.textContent = 'Đang gửi...';
 
-        let finalImageUrl = imageUrlInput || null;
+        let finalImageUrl = safeImageInputUrl || null;
         if (imageFile) {
             finalImageUrl = await uploadImageToStorage(imageFile, 'community');
         }
@@ -939,6 +1070,7 @@ window.submitNewCommunityPost = async function (event) {
             author,
             content,
             image_url: finalImageUrl,
+            source_url: safeSourceUrl,
             status: 'pending'
         }]);
 
@@ -1039,12 +1171,24 @@ function renderAdminPanel() {
                     </div>
                 </div>
             `),
-            ...state.pendingPosts.map(p => `
+            ...state.pendingPosts.map(p => {
+                const safeSourceUrl = sanitizeHttpUrl(p.source_url);
+                const sourceLinkHtml = safeSourceUrl ? `
+                    <p class="text-[11px] text-sage font-semibold break-all pt-0.5">
+                        <i class="fa-solid fa-link mr-1"></i>Nguồn bài báo:
+                        <a href="${escapeHtml(safeSourceUrl)}" target="_blank" rel="noopener noreferrer" class="underline hover:text-terracotta">
+                            ${escapeHtml(safeSourceUrl)} <i class="fa-solid fa-arrow-up-right-from-square text-[9px] ml-0.5"></i>
+                        </a>
+                    </p>
+                ` : '';
+
+                return `
                 <div class="bg-white border border-amber-300 p-4 rounded-2xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 text-xs">
-                    <div class="space-y-1">
+                    <div class="space-y-1 min-w-0">
                         <span class="inline-block bg-sage text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase">Bài viết mới</span>
                         <p class="font-bold text-sm text-vintage-900">${escapeHtml(p.title)} <span class="font-normal text-vintage-600">(${escapeHtml(p.author)})</span></p>
                         <p class="text-vintage-700 line-clamp-2">${escapeHtml(p.content)}</p>
+                        ${sourceLinkHtml}
                     </div>
                     <div class="flex items-center gap-2 self-end sm:self-center flex-shrink-0">
                         <button type="button" onclick="approveItem('community_posts', ${p.id})" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3.5 py-2 rounded-xl cursor-pointer">
@@ -1055,7 +1199,8 @@ function renderAdminPanel() {
                         </button>
                     </div>
                 </div>
-            `)
+            `;
+            })
         ];
         pendingContainer.innerHTML = pendingHtml.join('');
     }
@@ -1152,6 +1297,7 @@ window.deleteOfficialCommunity = async function (id) {
     try {
         const { error } = await supabase.from('community_posts').delete().eq('id', id);
         if (error) throw error;
+        if (state.selectedPostId === id) closeCommunityDetail();
         showToast('Đã xóa bài viết!');
         await loadAllData(false);
     } catch (err) {

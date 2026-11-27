@@ -794,11 +794,18 @@
                 </div>
                 <div>
                     <label class="block text-[10px] font-bold text-vintage-800 uppercase mb-1">Chọn ảnh bài viết từ
-                        thiết bị (hoặc dán URL)</label>
+                        thiết bị (hoặc dán link ảnh trực tiếp)</label>
                     <input type="file" id="commImageFile" accept="image/*"
                         class="w-full bg-vintage-100 border border-vintage-300 rounded-xl px-3.5 py-2 text-xs text-vintage-900 mb-2">
-                    <input type="url" id="commImage" placeholder="Hoặc dán link https://..."
+                    <input type="url" id="commImage"
+                        placeholder="Hoặc dán link ảnh trực tiếp (.jpg, .png, .webp...) — không dán link bài báo vào đây"
                         class="w-full bg-vintage-100 border border-vintage-300 rounded-xl px-3.5 py-2 text-xs text-vintage-900">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-vintage-800 uppercase mb-1">Đường dẫn bài báo / Nguồn
+                        tham khảo (không bắt buộc)</label>
+                    <input type="url" id="commSourceUrl" placeholder="https://baohatinh.vn/..."
+                        class="w-full bg-vintage-100 border border-vintage-300 rounded-xl px-3.5 py-2 text-xs focus:ring-2 focus:ring-terracotta focus:outline-none text-vintage-900">
                 </div>
                 <div>
                     <label class="block text-[10px] font-bold text-vintage-800 uppercase mb-1">Nội dung câu chuyện văn
@@ -815,6 +822,49 @@
                         bài đăng</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Modal: Community Post Detail -->
+    <div id="communityDetailModal"
+        class="fixed inset-0 z-50 hidden bg-vintage-900/70 backdrop-blur-sm flex items-center justify-center p-4"
+        onclick="if (event.target === this) closeCommunityDetail()">
+        <div
+            class="bg-vintage-50 w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden flex flex-col border border-vintage-300 max-h-[90vh]">
+            <div class="relative h-52 sm:h-60 bg-vintage-200 flex-shrink-0">
+                <img id="commDetailImage" src="https://placehold.co/600x400/d1c4b0/4a3f35?text=Hà+Tĩnh" alt="Minh họa bài viết"
+                    class="w-full h-full object-cover"
+                    onerror="this.src='https://placehold.co/600x400/d1c4b0/4a3f35?text=Hà+Tĩnh'">
+                <div class="absolute inset-0 bg-gradient-to-t from-vintage-900/85 via-vintage-900/30 to-transparent"></div>
+                <button type="button" onclick="closeCommunityDetail()"
+                    class="absolute top-4 right-4 w-8 h-8 bg-black/40 hover:bg-black/60 text-white rounded-full flex items-center justify-center transition cursor-pointer">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+                <div class="absolute bottom-4 left-6 right-6 space-y-1.5">
+                    <span
+                        class="inline-block bg-sage text-white text-[10px] font-bold px-2.5 py-1 rounded-md uppercase tracking-wider">Cộng đồng &amp; Di sản</span>
+                    <h3 id="commDetailTitle" class="text-xl sm:text-2xl font-extrabold text-white font-serif leading-snug"></h3>
+                    <p id="commDetailAuthor" class="text-xs text-amber-200 font-semibold flex items-center gap-1.5"></p>
+                </div>
+            </div>
+
+            <div class="p-6 overflow-y-auto custom-scrollbar flex-grow space-y-4">
+                <div class="bg-vintage-100 border border-vintage-200 rounded-2xl p-4 sm:p-5">
+                    <div id="commDetailContent"
+                        class="text-sm text-vintage-900 leading-relaxed whitespace-pre-line break-words"></div>
+                </div>
+            </div>
+
+            <div class="p-4 bg-vintage-100 border-t border-vintage-200 flex items-center justify-between gap-3 flex-wrap">
+                <a id="commDetailSourceBtn" href="#" target="_blank" rel="noopener noreferrer"
+                    class="hidden inline-flex items-center gap-2 bg-terracotta hover:bg-terracotta-dark text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow transition">
+                    <i class="fa-solid fa-newspaper"></i>
+                    <span>Đọc bài báo gốc</span>
+                    <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+                </a>
+                <button type="button" onclick="closeCommunityDetail()"
+                    class="bg-vintage-300 hover:bg-vintage-400 text-vintage-900 text-xs font-semibold px-5 py-2.5 rounded-xl transition cursor-pointer ml-auto">Đóng</button>
+            </div>
         </div>
     </div>
 
